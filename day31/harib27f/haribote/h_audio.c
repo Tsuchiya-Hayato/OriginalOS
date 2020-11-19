@@ -1,5 +1,5 @@
 #include "bootpack.h"
-
+// 39行目からbootpack.hに構造体等を書いています
 
 int main(){
   volatile struct hdaduio_mmio *mmio = (volatile struct hdaduio_mmio *) BAR0;
