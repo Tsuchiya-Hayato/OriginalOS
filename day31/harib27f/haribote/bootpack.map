@@ -1,5 +1,5 @@
-text size :  24413(0x05F5D)
-data size :  15353(0x03BF9)
+text size :  24632(0x06038)
+data size :  15379(0x03C13)
 bss  size :      0(0x00000)
 
 0x00000000 : (.text)
@@ -139,16 +139,18 @@ bss  size :      0(0x00000)
 0x000046E9 : (.text)
 0x0000470E : _tek_getsize
 0x00004764 : _tek_decomp
-0x00005A4F : _hdaudio_test
 0x00005A4F : (.text)
-0x00005A9B : (.text)
-0x00005A9B : _HariStartup
-0x00005AA4 : _sprintf
-0x00005AA4 : (.text)
-0x00005AB8 : (.text)
-0x00005AF4 : _strtoul0
-0x00005BC7 : (.text)
-0x00005BEF : _vsprintf
+0x00005A4F : _init_corb
+0x00005A8A : _init_rirb
+0x00005AC8 : _hdaudio_test
+0x00005B76 : (.text)
+0x00005B76 : _HariStartup
+0x00005B7F : _sprintf
+0x00005B7F : (.text)
+0x00005B93 : (.text)
+0x00005BCF : _strtoul0
+0x00005CA2 : (.text)
+0x00005CCA : _vsprintf
 0x00000000 : (.data)
 0x00000000 : (.data)
 0x00000000 : (.data)
@@ -178,7 +180,7 @@ bss  size :      0(0x00000)
 0x00313A84 : (.data)
 0x00313B6E : (.data)
 0x00313BCC : (.data)
-0x00313BD9 : (.data)
+0x00313BF3 : (.data)
 0x00000000 : (.bss)
 0x00000000 : (.bss)
 0x00000000 : (.bss)

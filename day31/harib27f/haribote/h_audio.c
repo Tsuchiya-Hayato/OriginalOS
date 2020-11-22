@@ -6,7 +6,7 @@
 static volatile struct hdaudio_mmio *mmio = (volatile struct hdaudio_mmio *) BAR0;
 
 void init_corb(void){
-  //  CORB CTLのリセット(最後のRUNにする)
+  //  CORB CTLのリセット(最後のRUNにする),p37
   // p37, 1bit目を0にする
   mmio->corbctl = mmio->corbctl | ~(1 << 1);
   // CORB wpのリセット
@@ -21,8 +21,16 @@ void init_corb(void){
 }
 
 void init_rirb(void){
+  // RIRB CTLのリセット(最後のRUNにする),p37
+  // p38, 1bit目を0にする
+  mmio->rirbctl = mmio->rirbctl | ~(1 << 1);
+
   // RIRB wpのリセット
   mmio->rirbwp = mmio->rirbwp & (1 << 15);
+
+  // RIRB CTLの0と1bit目を1にする
+  mmio->rirbctl = mmio->rirbctl | (1 << 1);
+  mmio->rirbctl = mmio->rirbctl | (1 << 0);
 
 }
 
@@ -79,7 +87,10 @@ void hdaudio_test(struct BOOTINFO *binfo,struct MEMMAN *man){
   char s[128];
   sprintf(s, "gcap: %x", mmio->gcap);
   putfonts8_asc(binfo->vram, binfo->scrnx, 100, 320, COL8_FFFFFF, s);
-
+  sprintf(s, "CORBSIZE: %x", mmio->corbsize);
+  putfonts8_asc(binfo->vram, binfo->scrnx, 100, 340, COL8_FFFFFF, s);
+  sprintf(s, "RIRBSIZE: %x", mmio->rirbsize);
+  putfonts8_asc(binfo->vram, binfo->scrnx, 100, 360, COL8_FFFFFF, s);
   // int test_buffer = (int *) memman_alloc_4k(man, 4096);
   // char t[4096];
   // sprintf(t, "CORBSIZE: %x", test_buffer);
