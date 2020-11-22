@@ -1,11 +1,33 @@
 #include "bootpack.h"
 // 39行目からbootpack.hに構造体等を書いています
 
-static char corb_buffer[4096] __attribute__((aligned(4096)));
-static char rirb_buffer[4096] __attribute__((aligned(4096)));
+// static char corb_buffer[4096] __attribute__((aligned(4096)));
+// static char rirb_buffer[4096] __attribute__((aligned(4096)));
+static volatile struct hdaudio_mmio *mmio = (volatile struct hdaudio_mmio *) BAR0;
 
-void hdaudio_test(struct BOOTINFO *binfo){
-  volatile struct hdaudio_mmio *mmio = (volatile struct hdaudio_mmio *) BAR0;
+void init_corb(void){
+  //  CORB CTLのリセット(最後のRUNにする)
+  // p37, 1bit目を0にする
+  mmio->corbctl = mmio->corbctl | ~(1 << 1);
+  // CORB wpのリセット
+  mmio->corbwp = 0;
+  // CORB rpの15bit目に1を書き込みその後0を書き込む
+  mmio->corbrp = mmio->corbrp & (1 << 15);
+  mmio->corbrp = 0;
+
+
+  //  CORB CTLのRUN
+  mmio->corbctl = mmio->corbctl | (1 << 1);
+}
+
+void init_rirb(void){
+  // RIRB wpのリセット
+  mmio->rirbwp = mmio->rirbwp & (1 << 15);
+
+}
+
+
+void hdaudio_test(struct BOOTINFO *binfo,struct MEMMAN *man){
   int iss = (mmio->gcap >> 8) & 0xf;
   int oss = (mmio->gcap >> 12) & 0xf;
   int x = (0x80 + iss * 0x20);
@@ -28,6 +50,7 @@ void hdaudio_test(struct BOOTINFO *binfo){
 
 
   // 0x12003456 <- *un*aligned
+
   // 0x12003000 <- 4KB-aligned
 
   // 4KB-aligned addresses (4KiB == 4096 == 0x1000):
@@ -52,15 +75,16 @@ void hdaudio_test(struct BOOTINFO *binfo){
   // assert(addr & ~(0x800 - 1) == 0);
   //                 ^^^^^^^^^^
   //                   0x7ff
-
+  
   char s[128];
   sprintf(s, "gcap: %x", mmio->gcap);
   putfonts8_asc(binfo->vram, binfo->scrnx, 100, 320, COL8_FFFFFF, s);
 
-  sprintf(s, "CORB Buffer Address: 0x%x", corb_buffer);
-  putfonts8_asc(binfo->vram, binfo->scrnx, 100, 220, COL8_FFFFFF, s);
-  sprintf(s, "RIRB Buffer Address: 0x%p", rirb_buffer);
-  putfonts8_asc(binfo->vram, binfo->scrnx, 100, 280, COL8_FFFFFF, s);
+  // int test_buffer = (int *) memman_alloc_4k(man, 4096);
+  // char t[4096];
+  // sprintf(t, "CORBSIZE: %x", test_buffer);
+  // putfonts8_asc(binfo->vram, binfo->scrnx, 100, 350, COL8_FFFFFF, t);
+
   // printf("gcap = %x\n", mmio->gcap);
 }
 

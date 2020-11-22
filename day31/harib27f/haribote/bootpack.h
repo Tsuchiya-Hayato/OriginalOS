@@ -36,97 +36,6 @@ void asm_hrb_api(void);
 void start_app(int eip, int cs, int esp, int ds, int *tss_esp0);
 void asm_end_app(void);
 
-/* h_audio.c */
-#include <stdio.h>
-// #include <stdint.h>
-#define __packed __attribute__((packed))
-#define BAR0    0xfebf0000
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned int uint32_t;
-typedef unsigned long long uint64_t;
-struct __packed hdaudio_mmio {
-    uint16_t gcap;
-    uint8_t vmin;
-    uint8_t vmaj;
-    uint16_t outpay;
-    uint16_t inpay;
-    uint64_t gctl;
-    uint16_t wakeen;
-    uint16_t wakests;
-    uint16_t gsts;
-    uint64_t rsvd;
-    uint16_t outstrmpay;
-    uint16_t instrpay;
-    uint64_t rsvd2;
-    uint64_t intctl;
-    uint64_t intsts;
-    uint64_t rsvd3;
-    uint64_t ssync;
-    uint64_t rsvd4;
-    uint64_t corblbase;
-    uint64_t corbubse;
-    uint16_t corbwp;
-    uint16_t corbrp;
-    uint8_t corbctl;
-    uint8_t corbsts;
-    uint8_t corbsize;
-    uint8_t rsvd5;
-    uint64_t rirblbase;
-    uint64_t rirbubase;
-    uint16_t rirbwp;
-    uint16_t rintcnt;
-    uint8_t rirbctl;
-    uint8_t rirbsize;
-    uint8_t rsvd6;
-    uint64_t icol;
-    uint64_t icll;
-    uint64_t icis;
-    uint64_t rsvd7;
-    uint64_t dpiblbase;
-    uint64_t dpibubase;
-    uint64_t rsvd8;
-    uint16_t sd0ctl;
-    uint8_t sd0sts;
-    uint64_t sd0lpib;
-    uint64_t sd0cbl;
-    uint16_t sd0lvi;
-    uint16_t rsdv9;
-    uint16_t sd0fifod;
-    uint16_t sd0fmt;
-    uint64_t rsvd10;
-    uint64_t sd0bdpl;
-    uint64_t sd0bdpu;
-};
-struct __packed hdaudio_input_stream_descriptor {
-  uint32_t sdnctl;
-  uint8_t sdnsts;
-  uint64_t sdnlpib;
-  uint64_t sdncbl;
-  uint16_t sdnlvi;
-  uint16_t rsdv11;
-  uint16_t sdnfifod;
-  uint16_t sdnfmt;
-  uint64_t rsdv12;
-  uint64_t sdnbdpl;
-  uint64_t sdnbdpu;
-};
-
-struct __packed hdaudio_output_stream_descriptor {
-    uint16_t sdmctl;
-    uint8_t sdmsts;
-    uint64_t sdmlpib;
-    uint64_t sdmcbl;
-    uint16_t sdmlvi;
-    uint16_t rsdv13;
-    uint16_t sdmfifod;
-    uint16_t sdmfmt;
-    uint64_t rsvd14;
-    uint64_t sdmbdpl;
-    uint64_t sdmbdpu;
-};
-void hdaudio_test(struct BOOTINFO *binfo);
-
 /* fifo.c */
 struct FIFO32 {
 	int *buf;
@@ -382,6 +291,96 @@ char *file_loadfile2(int clustno, int *psize, int *fat);
 /* tek.c */
 int tek_getsize(unsigned char *p);
 int tek_decomp(unsigned char *p, char *q, int size);
+
+/* h_audio.c */
+#define __packed __attribute__((packed))
+#define BAR0    0xfebf0000
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long uint64_t;
+struct __packed hdaudio_mmio {
+    uint16_t gcap;
+    uint8_t vmin;
+    uint8_t vmaj;
+    uint16_t outpay;
+    uint16_t inpay;
+    uint64_t gctl;
+    uint16_t wakeen;
+    uint16_t wakests;
+    uint16_t gsts;
+    uint64_t rsvd;
+    uint16_t outstrmpay;
+    uint16_t instrpay;
+    uint64_t rsvd2;
+    uint64_t intctl;
+    uint64_t intsts;
+    uint64_t rsvd3;
+    uint64_t ssync;
+    uint64_t rsvd4;
+    uint64_t corblbase;
+    uint64_t corbubse;
+    uint16_t corbwp;
+    uint16_t corbrp;
+    uint8_t corbctl;
+    uint8_t corbsts;
+    uint8_t corbsize;
+    uint8_t rsvd5;
+    uint64_t rirblbase;
+    uint64_t rirbubase;
+    uint16_t rirbwp;
+    uint16_t rintcnt;
+    uint8_t rirbctl;
+    uint8_t rirbsize;
+    uint8_t rsvd6;
+    uint64_t icol;
+    uint64_t icll;
+    uint64_t icis;
+    uint64_t rsvd7;
+    uint64_t dpiblbase;
+    uint64_t dpibubase;
+    uint64_t rsvd8;
+    uint16_t sd0ctl;
+    uint8_t sd0sts;
+    uint64_t sd0lpib;
+    uint64_t sd0cbl;
+    uint16_t sd0lvi;
+    uint16_t rsdv9;
+    uint16_t sd0fifod;
+    uint16_t sd0fmt;
+    uint64_t rsvd10;
+    uint64_t sd0bdpl;
+    uint64_t sd0bdpu;
+};
+struct __packed hdaudio_input_stream_descriptor {
+  uint32_t sdnctl;
+  uint8_t sdnsts;
+  uint64_t sdnlpib;
+  uint64_t sdncbl;
+  uint16_t sdnlvi;
+  uint16_t rsdv11;
+  uint16_t sdnfifod;
+  uint16_t sdnfmt;
+  uint64_t rsdv12;
+  uint64_t sdnbdpl;
+  uint64_t sdnbdpu;
+};
+
+struct __packed hdaudio_output_stream_descriptor {
+    uint16_t sdmctl;
+    uint8_t sdmsts;
+    uint64_t sdmlpib;
+    uint64_t sdmcbl;
+    uint16_t sdmlvi;
+    uint16_t rsdv13;
+    uint16_t sdmfifod;
+    uint16_t sdmfmt;
+    uint64_t rsvd14;
+    uint64_t sdmbdpl;
+    uint64_t sdmbdpu;
+};
+void hdaudio_test(struct BOOTINFO *binfo,struct MEMMAN *man);
+void init_corb();
 
 /* bootpack.c */
 struct TASK *open_constask(struct SHEET *sht, unsigned int memtotal);
