@@ -38,9 +38,13 @@ void asm_end_app(void);
 
 /* h_audio.c */
 #include <stdio.h>
-#include <stdint.h>
+// #include <stdint.h>
 #define __packed __attribute__((packed))
 #define BAR0    0xfebf0000
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long uint64_t;
 struct __packed hdaudio_mmio {
     uint16_t gcap;
     uint8_t vmin;
@@ -121,7 +125,7 @@ struct __packed hdaudio_output_stream_descriptor {
     uint64_t sdmbdpl;
     uint64_t sdmbdpu;
 };
-
+void hdaudio_test(struct BOOTINFO *binfo);
 
 /* fifo.c */
 struct FIFO32 {
