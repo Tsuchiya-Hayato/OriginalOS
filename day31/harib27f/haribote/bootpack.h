@@ -312,6 +312,19 @@ struct __packed hdaudio_mmio {
     uint8_t rsvd[6];
     uint16_t outstrmpay;
     uint16_t instrpay;
+    // (size of rsvd) = (next_offset) - (prev_offset) + (prev_size)
+    //
+    //     0x38 +-----------+
+    //          |           |
+    //          |   SSYNC   |  size = 4 bytes
+    //          |           |
+    //     0x3c +-----------+
+    //          |           |
+    //          |   rsvd    |  size = 0x40 - 0x3c = 4 bytes
+    //          |           |
+    //     0x40 +-----------+
+    //          | CORBLBASE |
+    //
     uint8_t rsvd2[4];
     uint32_t intctl;
     uint32_t intsts;
@@ -321,7 +334,7 @@ struct __packed hdaudio_mmio {
     uint32_t ssync;
     uint8_t rsvd5[4];
     uint32_t corblbase;
-    uint32_t corbubse;
+    uint32_t corbubase;
     uint16_t corbwp;
     uint16_t corbrp;
     uint8_t corbctl;
@@ -383,7 +396,8 @@ struct __packed hdaudio_output_stream_descriptor {
     uint64_t sdmbdpu;
 };
 void hdaudio_test(struct BOOTINFO *binfo,struct MEMMAN *man);
-void init_corb();
+void init_corb(struct MEMMAN *man);
+void init_rirb(struct MEMMAN *man);
 
 /* bootpack.c */
 struct TASK *open_constask(struct SHEET *sht, unsigned int memtotal);

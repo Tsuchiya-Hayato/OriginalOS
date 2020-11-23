@@ -1,37 +1,74 @@
 #include "bootpack.h"
 // 39行目からbootpack.hに構造体等を書いています
-
-// static char corb_buffer[4096] __attribute__((aligned(4096)));
-// static char rirb_buffer[4096] __attribute__((aligned(4096)));
 static volatile struct hdaudio_mmio *mmio = (volatile struct hdaudio_mmio *) BAR0;
 
-void init_corb(void){
+void init_corb(struct MEMMAN *man){
   //  CORB CTLのリセット(最後のRUNにする),p37
   // p37, 1bit目を0にする
   mmio->corbctl = mmio->corbctl | ~(1 << 1);
+
+  //sizeの取得
+  int corb_num_entries = 256;
+
+  // memmoryのアドレス書き込み,p36
+  unsigned int corb_buffer = memman_alloc_4k(man, 4096);
+
+  // Alignment:
+  //
+  // xxxx xx00 0000 0000 = 1KiB = 1024
+  // xxxx 0000 0000 0000 = 4KiB = 4096
+  //
+  // x = 1 or 0
+
+  //
+  // CPU <----> MEMORY 
+  //  ^              ^
+  //  | io, out命令   | DMA
+  //  V              |
+  // HD Audio  <-----+
+  //
+
+  //  63_______________32|31______________________0
+  // |    upper          |         low            |
+  // ----------------------------------------------
+  mmio->corblbase = corb_buffer;
+  mmio->corbubase = (corb_buffer >> 31);
+
+
   // CORB wpのリセット
   mmio->corbwp = 0;
   // CORB rpの15bit目に1を書き込みその後0を書き込む
-  mmio->corbrp = mmio->corbrp & (1 << 15);
+  mmio->corbrp = mmio->corbrp | (1 << 15);
   mmio->corbrp = 0;
-
 
   //  CORB CTLのRUN
   mmio->corbctl = mmio->corbctl | (1 << 1);
 }
 
-void init_rirb(void){
-  // RIRB CTLのリセット(最後のRUNにする),p37
-  // p38, 1bit目を0にする
+void init_rirb(struct MEMMAN *man){
+  // RIRB CTLのリセット(最後のRUNにする),p40
+  // p40, 1bit目を0にする
   mmio->rirbctl = mmio->rirbctl | ~(1 << 1);
 
-  // RIRB wpのリセット
-  mmio->rirbwp = mmio->rirbwp & (1 << 15);
+  // RIRB sizeの取得
+  int rirb_num_entries = 256;
+
+// memmoryのアドレス書き込み,p36
+  unsigned int rirb_buffer = memman_alloc_4k(man, 4096);
+  mmio->rirblbase = rirb_buffer;
+  mmio->rirbubase = (rirb_buffer >> 31);
+
+  // RIRB wpのリセット, p39
+  // 15bit目に1を書き込み、0を書き込み
+  mmio->rirbwp = mmio->rirbwp | (1 << 15);
+  mmio->rirbwp = 0;
+
+  // RIRB CNTの0bit目に1を入れる
+  mmio->rintcnt = mmio->rintcnt | (1 << 0);
 
   // RIRB CTLの0と1bit目を1にする
   mmio->rirbctl = mmio->rirbctl | (1 << 1);
   mmio->rirbctl = mmio->rirbctl | (1 << 0);
-
 }
 
 
@@ -83,7 +120,6 @@ void hdaudio_test(struct BOOTINFO *binfo,struct MEMMAN *man){
   // assert(addr & ~(0x800 - 1) == 0);
   //                 ^^^^^^^^^^
   //                   0x7ff
-  int *corb_size = BAR0 + 0x4e;
   char s[128];
   sprintf(s, "gcap: %x", mmio->gcap);
   putfonts8_asc(binfo->vram, binfo->scrnx, 100, 320, COL8_FFFFFF, s);
@@ -91,11 +127,9 @@ void hdaudio_test(struct BOOTINFO *binfo,struct MEMMAN *man){
   putfonts8_asc(binfo->vram, binfo->scrnx, 100, 340, COL8_FFFFFF, s);
   sprintf(s, "RIRBSIZE: %x",  mmio->rirbsize);
   putfonts8_asc(binfo->vram, binfo->scrnx, 100, 360, COL8_FFFFFF, s);
-  // int test_buffer = (int *) memman_alloc_4k(man, 4096);
-  // char t[4096];
-  // sprintf(t, "CORBSIZE: %x", test_buffer);
-  // putfonts8_asc(binfo->vram, binfo->scrnx, 100, 350, COL8_FFFFFF, t);
 
-  // printf("gcap = %x\n", mmio->gcap);
+  int test_buffer = (int *) memman_alloc_4k(man, 4096);
+  sprintf(s, "memory size: %dKB", sizeof(test_buffer));
+  putfonts8_asc(binfo->vram, binfo->scrnx, 100, 400, COL8_FFFFFF, s);
 }
 

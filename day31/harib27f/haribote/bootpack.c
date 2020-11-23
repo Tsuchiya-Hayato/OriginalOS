@@ -129,6 +129,8 @@ void HariMain(void)
 	// hdaudio_test(binfo);
 	// init_corb(binfo);
 	hdaudio_test(binfo, memman);
+	init_corb(memman);
+	init_rirb(memman);
 
 	for (;;) {
 		if (fifo32_status(&keycmd) > 0 && keycmd_wait < 0) {
