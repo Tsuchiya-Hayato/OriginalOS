@@ -83,13 +83,13 @@ void hdaudio_test(struct BOOTINFO *binfo,struct MEMMAN *man){
   // assert(addr & ~(0x800 - 1) == 0);
   //                 ^^^^^^^^^^
   //                   0x7ff
-  
+  int *corb_size = BAR0 + 0x4e;
   char s[128];
   sprintf(s, "gcap: %x", mmio->gcap);
   putfonts8_asc(binfo->vram, binfo->scrnx, 100, 320, COL8_FFFFFF, s);
   sprintf(s, "CORBSIZE: %x", mmio->corbsize);
   putfonts8_asc(binfo->vram, binfo->scrnx, 100, 340, COL8_FFFFFF, s);
-  sprintf(s, "RIRBSIZE: %x", mmio->rirbsize);
+  sprintf(s, "RIRBSIZE: %x",  mmio->rirbsize);
   putfonts8_asc(binfo->vram, binfo->scrnx, 100, 360, COL8_FFFFFF, s);
   // int test_buffer = (int *) memman_alloc_4k(man, 4096);
   // char t[4096];

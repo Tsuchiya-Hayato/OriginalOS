@@ -17,18 +17,18 @@
     17 00000000 8B 15 [00000000]                	MOV	EDX,DWORD [_mmio]
     18 00000006 55                              	PUSH	EBP
     19 00000007 89 E5                           	MOV	EBP,ESP
-    20 00000009 8A 42 66                        	MOV	AL,BYTE [102+EDX]
+    20 00000009 8A 42 4C                        	MOV	AL,BYTE [76+EDX]
     21 0000000C 83 C8 FD                        	OR	EAX,-3
-    22 0000000F 88 42 66                        	MOV	BYTE [102+EDX],AL
+    22 0000000F 88 42 4C                        	MOV	BYTE [76+EDX],AL
     23 00000012 8B 15 [00000000]                	MOV	EDX,DWORD [_mmio]
-    24 00000018 66 C7 42 62 0000                	MOV	WORD [98+EDX],0
-    25 0000001E 66 8B 42 64                     	MOV	AX,WORD [100+EDX]
+    24 00000018 66 C7 42 48 0000                	MOV	WORD [72+EDX],0
+    25 0000001E 66 8B 42 4A                     	MOV	AX,WORD [74+EDX]
     26 00000022 66 25 8000                      	AND	AX,-32768
-    27 00000026 66 89 42 64                     	MOV	WORD [100+EDX],AX
-    28 0000002A 66 C7 42 64 0000                	MOV	WORD [100+EDX],0
-    29 00000030 8A 42 66                        	MOV	AL,BYTE [102+EDX]
+    27 00000026 66 89 42 4A                     	MOV	WORD [74+EDX],AX
+    28 0000002A 66 C7 42 4A 0000                	MOV	WORD [74+EDX],0
+    29 00000030 8A 42 4C                        	MOV	AL,BYTE [76+EDX]
     30 00000033 83 C8 02                        	OR	EAX,2
-    31 00000036 88 42 66                        	MOV	BYTE [102+EDX],AL
+    31 00000036 88 42 4C                        	MOV	BYTE [76+EDX],AL
     32 00000039 5D                              	POP	EBP
     33 0000003A C3                              	RET
     34 0000003B                                 	GLOBAL	_init_rirb
@@ -36,20 +36,20 @@
     36 0000003B 8B 15 [00000000]                	MOV	EDX,DWORD [_mmio]
     37 00000041 55                              	PUSH	EBP
     38 00000042 89 E5                           	MOV	EBP,ESP
-    39 00000044 8A 42 7E                        	MOV	AL,BYTE [126+EDX]
+    39 00000044 8A 42 5C                        	MOV	AL,BYTE [92+EDX]
     40 00000047 83 C8 FD                        	OR	EAX,-3
-    41 0000004A 88 42 7E                        	MOV	BYTE [126+EDX],AL
+    41 0000004A 88 42 5C                        	MOV	BYTE [92+EDX],AL
     42 0000004D 8B 15 [00000000]                	MOV	EDX,DWORD [_mmio]
-    43 00000053 66 8B 42 7A                     	MOV	AX,WORD [122+EDX]
+    43 00000053 66 8B 42 58                     	MOV	AX,WORD [88+EDX]
     44 00000057 66 25 8000                      	AND	AX,-32768
-    45 0000005B 66 89 42 7A                     	MOV	WORD [122+EDX],AX
-    46 0000005F 8A 42 7E                        	MOV	AL,BYTE [126+EDX]
+    45 0000005B 66 89 42 58                     	MOV	WORD [88+EDX],AX
+    46 0000005F 8A 42 5C                        	MOV	AL,BYTE [92+EDX]
     47 00000062 83 C8 02                        	OR	EAX,2
-    48 00000065 88 42 7E                        	MOV	BYTE [126+EDX],AL
+    48 00000065 88 42 5C                        	MOV	BYTE [92+EDX],AL
     49 00000068 8B 15 [00000000]                	MOV	EDX,DWORD [_mmio]
-    50 0000006E 8A 42 7E                        	MOV	AL,BYTE [126+EDX]
+    50 0000006E 8A 42 5C                        	MOV	AL,BYTE [92+EDX]
     51 00000071 83 C8 01                        	OR	EAX,1
-    52 00000074 88 42 7E                        	MOV	BYTE [126+EDX],AL
+    52 00000074 88 42 5C                        	MOV	BYTE [92+EDX],AL
     53 00000077 5D                              	POP	EBP
     54 00000078 C3                              	RET
     55                                          [SECTION .data]
@@ -90,7 +90,7 @@
     88 000000B9 E8 [00000000]                   	CALL	_putfonts8_asc
     89 000000BE A1 [00000000]                   	MOV	EAX,DWORD [_mmio]
     90 000000C3 83 C4 24                        	ADD	ESP,36
-    91 000000C6 8A 40 68                        	MOV	AL,BYTE [104+EAX]
+    91 000000C6 8A 40 4E                        	MOV	AL,BYTE [78+EAX]
     92 000000C9 0F B6 C0                        	MOVZX	EAX,AL
     93 000000CC 50                              	PUSH	EAX
     94 000000CD 68 [0000000D]                   	PUSH	LC1
@@ -106,7 +106,7 @@
    104 000000EA E8 [00000000]                   	CALL	_putfonts8_asc
    105 000000EF A1 [00000000]                   	MOV	EAX,DWORD [_mmio]
    106 000000F4 83 C4 24                        	ADD	ESP,36
-   107 000000F7 8A 40 7F                        	MOV	AL,BYTE [127+EAX]
+   107 000000F7 8A 40 5E                        	MOV	AL,BYTE [94+EAX]
    108 000000FA 0F B6 C0                        	MOVZX	EAX,AL
    109 000000FD 50                              	PUSH	EAX
    110 000000FE 68 [0000001A]                   	PUSH	LC2
