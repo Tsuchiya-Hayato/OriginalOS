@@ -1,6 +1,17 @@
 #include "bootpack.h"
 // 39行目からbootpack.hに構造体等を書いています
 static volatile struct hdaudio_mmio *mmio = (volatile struct hdaudio_mmio *) BAR0;
+static int corb_num_entries;
+static int rirb_num_entries;
+static unsigned int corb_buffer;
+static unsigned int rirb_buffer;
+
+
+// static uint32_t corb_enquenu(){
+
+// }
+
+
 
 void init_corb(struct MEMMAN *man){
   //  CORB CTLのリセット(最後のRUNにする),p37
@@ -8,10 +19,10 @@ void init_corb(struct MEMMAN *man){
   mmio->corbctl = mmio->corbctl | ~(1 << 1);
 
   //sizeの取得
-  int corb_num_entries = 256;
+  corb_num_entries = 256;
 
   // memmoryのアドレス書き込み,p36
-  unsigned int corb_buffer = memman_alloc_4k(man, 4096);
+  corb_buffer = memman_alloc_4k(man, 4096);
 
   // Alignment:
   //
@@ -33,14 +44,11 @@ void init_corb(struct MEMMAN *man){
   // ----------------------------------------------
   mmio->corblbase = corb_buffer;
   mmio->corbubase = (corb_buffer >> 31);
-
-
   // CORB wpのリセット
   mmio->corbwp = 0;
   // CORB rpの15bit目に1を書き込みその後0を書き込む
   mmio->corbrp = mmio->corbrp | (1 << 15);
   mmio->corbrp = 0;
-
   //  CORB CTLのRUN
   mmio->corbctl = mmio->corbctl | (1 << 1);
 }
@@ -51,10 +59,10 @@ void init_rirb(struct MEMMAN *man){
   mmio->rirbctl = mmio->rirbctl | ~(1 << 1);
 
   // RIRB sizeの取得
-  int rirb_num_entries = 256;
+  rirb_num_entries = 256;
 
 // memmoryのアドレス書き込み,p36
-  unsigned int rirb_buffer = memman_alloc_4k(man, 4096);
+  rirb_buffer = memman_alloc_4k(man, 4096);
   mmio->rirblbase = rirb_buffer;
   mmio->rirbubase = (rirb_buffer >> 31);
 
