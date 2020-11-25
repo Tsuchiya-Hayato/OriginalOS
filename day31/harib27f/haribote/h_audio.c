@@ -3,13 +3,37 @@
 static volatile struct hdaudio_mmio *mmio = (volatile struct hdaudio_mmio *) BAR0;
 static int corb_num_entries;
 static int rirb_num_entries;
-static unsigned int corb_buffer;
-static unsigned int rirb_buffer;
+static uint32_t corb_buffer;
+static uint32_t rirb_buffer;
+static uint32_t corb_wp = 1;
+static int iss;
+static int oss;
+static int speaker_node = -1;
+static int pin_node = -1;
 
 
-// static uint32_t corb_enquenu(){
+static uint32_t corb_enquenu(int cad, uint32_t nid, uint32_t verb, uint32_t payload){
+  uint32_t *queue = (uint32_t *) corb_buffer;
+  uint32_t current = corb_wp % corb_num_entries;
+  uint32_t data = (cad << 28) | (nid << 20) | (verb << 8) | payload;
+  queue[current] = data;
+  mmio->corbwp = current;
+  corb_wp++;
+  return current;
+}
 
-// }
+static uint32_t rirb_data(uint32_t index) {
+    uint32_t *resps = (uint32_t *) rirb_buffer;
+    return resps[index * 2];
+}
+
+static uint32_t run_command(uint32_t nid, uint32_t verb, uint32_t payload) {
+    int cad = 0;
+    uint32_t idx = corb_enqueue(cad, nid, verb, payload);
+    while ((io_read8(regs, REG_RIRBSTS) & 1) == 0);
+    io_write8(regs, REG_RIRBSTS, 0x5);
+    return rirb_data(idx);
+}
 
 
 
@@ -61,7 +85,7 @@ void init_rirb(struct MEMMAN *man){
   // RIRB sizeの取得
   rirb_num_entries = 256;
 
-// memmoryのアドレス書き込み,p36
+// memoryのアドレス書き込み,p36
   rirb_buffer = memman_alloc_4k(man, 4096);
   mmio->rirblbase = rirb_buffer;
   mmio->rirbubase = (rirb_buffer >> 31);
@@ -81,8 +105,8 @@ void init_rirb(struct MEMMAN *man){
 
 
 void hdaudio_test(struct BOOTINFO *binfo,struct MEMMAN *man){
-  int iss = (mmio->gcap >> 8) & 0xf;
-  int oss = (mmio->gcap >> 12) & 0xf;
+  iss = (mmio->gcap >> 8) & 0xf;
+  oss = (mmio->gcap >> 12) & 0xf;
   int x = (0x80 + iss * 0x20);
   int y = (0x80 + iss * 0x20) + (oss*0x20);
   volatile struct hdaudio_input_stream_descriptor *input_desc = BAR0 + x;
