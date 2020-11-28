@@ -102,61 +102,69 @@ void init_rirb(struct MEMMAN *man){
 }
 
 static int look_for_node(uint8_t parent_nid, uint8_t target_widget_type) {
-    uint32_t value = run_command(parent_nid, VERB_GET_PARAM, PARAM_NODE_CNT);
-    uint32_t nid_base = (value >> 16) & 0xff;
-    uint32_t num_nodes = value & 0xff;
-    if (!num_nodes) {
-        return -1;
-    }
-    for (uint32_t i = 0; i < num_nodes; i++) {
-        uint32_t value = run_command(nid_base + i, VERB_GET_PARAM,
-                                     PARAM_AUDIO_WIDGET_CAPS);
-        uint8_t widget_type = (value >> 20) & 0xf;
-        if (widget_type == target_widget_type) {
-            return nid_base + i;
-        }
-
-        int nid = look_for_node(nid_base + i, target_widget_type);
-        if (nid >= 0) {
-            return nid;
-        }
-    }
-    return -1;
+  uint32_t value = run_command(parent_nid, VERB_GET_PARAM, PARAM_NODE_CNT);
+  uint32_t nid_base = (value >> 16) & 0xff;
+  uint32_t num_nodes = value & 0xff;
+  if (!num_nodes) {
+      return -1;
+  }
+  uint32_t i;
+  for (i = 0; i < num_nodes; i++) {
+      uint32_t value = run_command(nid_base + i, VERB_GET_PARAM,
+                                   PARAM_AUDIO_WIDGET_CAPS);
+      uint8_t widget_type = (value >> 20) & 0xf;
+      if (widget_type == target_widget_type) {
+          return nid_base + i;
+      }
+      int nid = look_for_node(nid_base + i, target_widget_type);
+      if (nid >= 0) {
+          return nid;
+      }
+  }
+  return -1;
 }
 
-/// Initializes a stream.
-static void init_out_stream(struct hdaudio_stream *stream, int id) {
+// Initializes a stream.
+// static void init_out_stream(struct MEMMAN *man, int id) {
+//   // p28, iss:num of input stream
+//   // oss:num of output stream
+//   iss = (mmio->gcap >> 8) & 0xf;
+//   oss = (mmio->gcap >> 12) & 0xf;
+//   int x = (0x80 + iss * 0x20);
+//   int y = (0x80 + iss * 0x20) + (oss*0x20);
+//   volatile struct hdaudio_input_stream_descriptor *input_desc = BAR0 + x;
+//   volatile struct hdaudio_output_stream_descriptor *output_desc = BAR0 + y;
 
-    stream->id = id;
-    stream->offset = 0x80 + gcap_iss * 0x20 + (id - 1) * 0x20;
-    stream->buffer_size = 512 * 1024 /* 512KiB */ * 2;
-    stream->buffer_dma = dma_alloc(stream->buffer_size, DMA_ALLOC_FROM_DEVICE);
+//   int buffer_size = 512 * 1024 /* 512KiB */ * 2;
+//   uint32_t stream_buffer = memman_alloc_4k(man, buffer_size);
+//   // Set the stream ID.
+//   input_desc->sdnctl = input_desc->sdnctl & ~(0xf << 20) | (1 << 20));
 
-    // Set the stream ID.
-    io_write32(regs, REG_SDnCTL(stream),
-        (io_read32(regs, REG_SDnCTL(stream))
-             & ~(0xf << 20)) | (stream->id << 20));
 
-    // Populate the buffer descriptor list.
-    stream->bdl_dma = dma_alloc(stream->buffer_size, DMA_ALLOC_FROM_DEVICE);
-    struct hdaudio_buffer_desc *bd_list =
-        (struct hdaudio_buffer_desc *) dma_buf(stream->bdl_dma);
+//   // Populate the buffer descriptor list.
+//   uint32_t bdl_buffer = memman_alloc_4k(man, buffer_size);
 
-    // The spec requires at least two entries (see "3.3.39 Offset 8C: {IOB}ISDnLVI"
-    // in the spec).
-    size_t num_bds = 2;
-    bd_list[0].buffer_addr = dma_daddr(stream->buffer_dma);
-    bd_list[0].buffer_len = stream->buffer_size;
-    bd_list[0].ioc = 0;
-    bd_list[1].buffer_addr = 0;
-    bd_list[1].buffer_len = 0;
-    bd_list[1].ioc = 0;
+//   stream->bdl_dma = dma_alloc(stream->buffer_size, DMA_ALLOC_FROM_DEVICE);
+//   struct hdaudio_buffer_desc *bd_list = (struct hdaudio_buffer_desc *) dma_buf(stream->bdl_dma);
 
-    io_write32(regs, REG_SDnCBL(stream), stream->buffer_size);
-    io_write32(regs, REG_SDnLVI(stream), num_bds - 1);
-    io_write32(regs, REG_SDnBDLPL(stream), dma_daddr(stream->bdl_dma));
-    io_write32(regs, REG_SDnBDLPU(stream), dma_daddr(stream->bdl_dma) >> 32);
-}
+//   // The spec requires at least two entries (see "3.3.39 Offset 8C: {IOB}ISDnLVI"
+//   // in the spec).
+//   size_t num_bds = 2;
+//   bd_list[0].buffer_addr = dma_daddr(stream->buffer_dma);
+//   bd_list[0].buffer_len = stream->buffer_size;
+//   bd_list[0].ioc = 0;
+//   bd_list[1].buffer_addr = 0;
+//   bd_list[1].buffer_len = 0;
+//   bd_list[1].ioc = 0;
+
+
+
+
+//   io_write32(regs, REG_SDnCBL(stream), stream->buffer_size);
+//   io_write32(regs, REG_SDnLVI(stream), num_bds - 1);
+//   io_write32(regs, REG_SDnBDLPL(stream), dma_daddr(stream->bdl_dma));
+//   io_write32(regs, REG_SDnBDLPU(stream), dma_daddr(stream->bdl_dma) >> 32);
+// }
 
 
 
@@ -182,8 +190,6 @@ void hdaudio_test(struct BOOTINFO *binfo,struct MEMMAN *man){
   //         --------
   //         10010100
   //         7  ^^^ 0
-
-
   // 0x12003456 <- *un*aligned
 
   // 0x12003000 <- 4KB-aligned
